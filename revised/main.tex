@@ -16,6 +16,7 @@
 \usepackage{verbatim}
 \usepackage{listings}
 \usepackage{xcolor}
+\allowdisplaybreaks
 
 \lstset{
   language=Python,
@@ -68,6 +69,14 @@ Electrical probing provides a potential alternative, as internal changes in cond
 
 In this work, the feasibility of electrical non-destructive testing is investigated using a finite-difference computational model of steady-state conduction. By comparing voltage distributions in a uniform conductive sheet to those obtained in the presence of an internal low-conductivity defect, localized voltage perturbations are identified. These deviations from the baseline voltage field indicate the presence and approximate location of internal flaws.
 
+The following is the hypothesis being tested in this experiment: if there is no flaw, there should be no measurable change in voltage:
+\begin{equation} 
+    H_0: \Delta V = V_{flaw} - V_{clean} = 0
+\end{equation}
+In the case that the flaw exists, the voltage distribution changes, showing a measurable disruption in the surface of the material. This can be modeled by the following equation:
+\begin{equation}
+    H_1: \Delta V = V_{flaw} - V_{clean} \neq 0
+\end{equation}
 
 \section{Methods and materials}
 
@@ -85,13 +94,15 @@ Fixed-potential (Dirichlet) boundary conditions were applied on the left and rig
 
 To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawed regions is several orders of magnitude lower than that of the surrounding flawless material. 
 
-The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. Because we needed to find the voltage at all 3600 points, we would either use the Jacobi method or the Gauss-Seidel method to solve the resulting system of linear equations. Since the Jacobi method would be too computationally expensive, we chose the Gauss-Seidel method, using the formula below to update the voltage of each node:
-\vspace{0.5em}
+The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. Because we needed to find the voltage at all 3600 points, we would either use the Jacobi method or the Gauss-Seidel method to solve the resulting system of linear equations. The Gauss-Seidel method updates the nodes individually based on the neighboring nodes, whereas the Jacobi method updates all nodes simultaneously using values from the previous iteration, making the Jacobi method computationally expensive. This is why the Gauss-Seidel method was implemented, where each calculation uses updated information rather than waiting for an entire iteration through the grid; the formula below was used to update the voltage of each node:
+\vspace{1em}
 \begin{equation} 
 V_{i,j}^{(\mathrm{GS})} = \frac{\sigma_{i+\frac{1}{2},j} \, V_{i+1,j} + \sigma_{i-\frac{1}{2},j} \, V_{i-1,j} + \sigma_{i,j+\frac{1}{2}} \, V_{i,j+1} + \sigma_{i,j-\frac{1}{2}} \, V_{i,j-1}}{\sigma_{i+\frac{1}{2},j} + \sigma_{i-\frac{1}{2},j} + \sigma_{i,j+\frac{1}{2}} + \sigma_{i,j-\frac{1}{2}}}
 \end{equation}
 \label{Gauss-Seidel update formula}
 \vspace{0.5em}
+
+
 
 However, to further optimize and increase the speed of the program, we used the Successive-Over-Relaxation (SOR) technique until the maximum change in voltage between iterations fell below $1.0 \times 10^{-6}$ using the below formula:
 
