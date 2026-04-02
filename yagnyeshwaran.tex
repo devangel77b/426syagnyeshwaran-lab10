@@ -47,8 +47,8 @@
 
 
 
-\title{Detecting flaws within conductive metal using non-destructive testing (NDT) techniques via the finite difference method} % Your title goes here
-\author{Sagarika Yagnyeshwaran\thanks{Author for correspondence: 426syagnyeshwaran@frhsd.com}, Jophy Lin, Rishith Kilaru, Srilekha Dantu, and Vijita Ayyangar\thanks{Authors are with the Science \& Engineering Magnet Program, Manalapan High School, 20 Church Lane, Englishtown, NJ 07726, USA}} % Authors names here
+\title{Numerical simulation of electrical non-destructive testing of metals for flaw detection via the finite difference method} % Your title goes here
+\author{Sagarika Yagnyeshwaran, Jophy Lin\thanks{Author for correspondence: 126jlin@frhsd.com}, Rishith Kilaru, Srilekha Dantu, and Vijita Ayyangar\thanks{Authors are with the Science \& Engineering Magnet Program, Manalapan High School, 20 Church Lane, Englishtown, NJ 07726, USA}} % Authors names here
 % First author is normally a special position
 % Corresponding author is a special position
 % Last author normally most senior
@@ -56,7 +56,7 @@
 \date{\today}
 \markboth{Journal of Science \& Engineering, Vol.~2, No.~5,~March 31, 2026}{Yagnyeshwaran  \MakeLowercase{\textit{et al.}}: Detecting flaws via finite difference method} % may need shortened form of author names or title
 \setcounter{page}{1} % LEAVE FOR EDITOR
-\newcommand{\keywords}{electric potential, equipotential lines, electric field visualizations, saline conductive medium, electrostatics, electric field mapping, data visualization in electrostatics, gel electrophoresis, electric field dynamics} % put your keywords here, lower case unless proper noun or acronym, separated by commas
+\newcommand{\keywords}{electric potential, equipotential lines, electric field visualizations, conductivity, Laplace equation, Poisson equation, electric field mapping, data visualization in electrostatics, finite difference method, Gauss-Seidel, successive over-relaxation} % put your keywords here, lower case unless proper noun or acronym, separated by commas
 \makeatletter
 \AtBeginDocument{
 \hypersetup{%
@@ -80,7 +80,7 @@ pdfkeywords={\keywords}}}
 
 % AUTHORS PUT YOUR ABSTRACT HERE
 \begin{abstract}
-The detection of internal flaws in a 3D-printed metal sample was investigated using a non-destructive testing (NDT) approach. A finite difference method on a regular grid of size 60 $\times$ 60 was used to compute the electric potential across the material, and Successive Over-Relaxation (SOR) was applied to efficiently solve the linear equations. By iterating over the finite difference grid and updating the electric potential at each point until a set tolerance was reached, changes in voltage across the material became apparent. Regions with significant positive and negative voltage deviations indicated the presence and location of a crack near the center of the conductivity map. This method matters because it demonstrates how computational techniques can be used to detect defects in metal components without physically damaging them, which is useful in manufacturing and materials inspection.
+The detection of internal flaws in a 3D-printed metal sample was simulated using a non-destructive testing (NDT) approach on a 2D grid. A finite difference method on a square grid of size 60 $\times$ 60 nodes was used to compute the electric potential across the material, and Successive Over-Relaxation (SOR) was applied to efficiently solve the linear equations. By iterating over the finite difference grid and updating the electric potential at each point until a set tolerance was reached, changes in voltage across the material became apparent. Regions with significant positive and negative voltage deviations indicated the presence and location of a crack near the center of the domain of the conductivity map. This method matters because it demonstrates how computational techniques can be used to detect defects in metal components without physically damaging them, which is useful in manufacturing and materials inspection.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -116,7 +116,7 @@ H_1: \Delta V = V_{flaw} - V_{clean} \neq 0
 Under steady-state conditions and in the absence of internal current, electrical conduction in a material with varying conductivity $\sigma(x,y)$ is governed by
 
 \begin{equation}
-\nabla \cdot (\sigma \nabla V) = 0
+\vec{\nabla} \cdot (\sigma \vec{\nabla} V) = 0
 \label{conductivity equation}
 \end{equation} 
 
@@ -126,33 +126,35 @@ The conductive domain was modeled as a two-dimensional square region on a unifor
 
 Fixed-potential (Dirichlet) boundary conditions were applied on the left and right boundaries of the domain, with voltages of \qty{1.0}{\volt} and \qty{0.0}{\volt}, respectively, representing the source and sink electrodes. The top and bottom boundaries were treated as electrically insulating by enforcing zero normal voltage gradients. Together, these boundaries establish a controlled voltage field across the metal, allowing the low-conductivity regions to locally distort the voltage field.
 
-To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawed regions is several orders of magnitude lower than that of the surrounding flawless material. 
+To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawless material was set constant to \num{1.0}, while the conductivity of the flawed regions was set constant to \num{1e-3}, both in normalized units. 
 
-The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. Because we needed to find the voltage at all 3600 points, we would either use the Jacobi method or the Gauss-Seidel method to solve the resulting system of linear equations. The Gauss-Seidel method updates the nodes individually based on the neighboring nodes, whereas the Jacobi method updates all nodes simultaneously using values from the previous iteration, making the Jacobi method computationally expensive. This is why the Gauss-Seidel method was implemented, where each calculation uses updated information rather than waiting for an entire iteration through the grid; the formula below was used to update the voltage of each node:
-\vspace{1em}
+The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. The harmonic mean was used because it models how current flows across materials with varying conductivities. Current is slowed down by the poorly conductive region, which is the crack, and so by taking the harmonic mean, the weight is shifted towards the smaller value. This method allows us to ensure that the current is conserved and prevents the overestimation of conductivity at the boundaries by clearly showing the defect. 
+
+Since we needed to find the voltage at all 3600 points, we would either use the Jacobi method or the Gauss-Seidel \cite{press:1992:numerical} method to solve the resulting system of linear equations. The Gauss-Seidel method updates the nodes individually based on the neighboring nodes, whereas the Jacobi method updates all nodes simultaneously using values from the previous iteration, making the Jacobi method computationally expensive. This is why the Gauss-Seidel method was implemented, where each calculation uses updated information rather than waiting for an entire iteration through the grid; the formula below was used to update the voltage of each node:
 \begin{equation} 
 V_{i,j}^{(\mathrm{GS})} = \frac{\sigma_{i+\frac{1}{2},j} \, V_{i+1,j} + \sigma_{i-\frac{1}{2},j} \, V_{i-1,j} + \sigma_{i,j+\frac{1}{2}} \, V_{i,j+1} + \sigma_{i,j-\frac{1}{2}} \, V_{i,j-1}}{\sigma_{i+\frac{1}{2},j} + \sigma_{i-\frac{1}{2},j} + \sigma_{i,j+\frac{1}{2}} + \sigma_{i,j-\frac{1}{2}}}
 \label{eq:Gauss-Seidel update formula}
 \end{equation}
 
-
-
-However, to further optimize and increase the speed of the program, we used the Successive-Over-Relaxation (SOR) technique until the maximum change in voltage between iterations fell below \qty{1.0e-6}{\volt} using the below formula:
-
+Successive-Over-Relaxation \cite{press:1992:numerical} (SOR) is the process of iteratively solving systems of linear equations by accelerating the convergence of the Gauss-Seidel Method. In order to further optimize and increase the speed of the program, we used the Successive-Over-Relaxation (SOR) technique until the maximum change in voltage between iterations fell below \qty{1e-6}{\volt} using the below formula:
 \begin{equation}
     V_{i,j}^{(n+1)} = (1-\omega)V_{i,j}^{(n)} + \omega V_{i,j}^{(\mathrm{GS})}
 \end{equation}
 
 The electric field was computed from the converged voltage distribution using:
 \begin{equation}
-    E = -\nabla V
-\end{equation} \label{Electric field}
+\vec{E} = -\vec{\nabla} V
+\label{Electric field}
+\end{equation} 
 To isolate the perturbations induced by the defects, the voltage difference field was calculated as such:
+\begin{equation} 
+\Delta V = V_{flaw} - V_{clean} 
+\label{Voltage difference field}
+\end{equation}
+The voltage difference field was then analyzed as the primary non-destructive testing signal. Numerical computations were performed in Python using the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. A Jupyter notebook \cite{kluyver:2016:jupyter} with finite difference code is available at \url{https://github.com/usernnamee/NDT-Testing-SOR} and \url{https://jupyter.snerds.org}. Data are also available at \url{https://github.com/devangel77b/427syagnyeshwaran-lab3}. 
 
-\begin{equation} \nabla V = V_{flaw} - V_{clean} \end{equation}\label{Voltage difference field}
-The voltage difference field was then analyzed as the primary non-destructive testing signal.
 
-This part needs to cite \cite{numpy,matplotlib}
+
 
 
 
@@ -174,7 +176,7 @@ The electric potential is shown in \cref{fig:results} for a uniform 3D-printed m
 \caption{Electric potential distribution for a conductive sheet containing a low-conductivity flaw.}
 \label{fig:flaw}
 \end{figure} 
-The potential distribution after adding a flaw is shown in \cref{fig:flaw}, with arrows representing the electric field lines that outline the shape of the flaw and defect. In this simulation, the flaw is a thin, horizontal crack. 
+The potential distribution after adding a flaw is shown in \cref{fig:flaw}, with arrows representing the potential field lines that outline the shape of the flaw and defect. In this simulation, the flaw is a thin, vertical crack. 
 
 
 \begin{figure}
@@ -205,16 +207,20 @@ These results support the idea that electrical probing is a viable non-destructi
 
 
 \section{Discussion}
-
 The behavior observed in this study can be explained by how electric current responds to changes in conductivity within a material.
 
 In a conductive sheet with no defects, current distributes evenly and the voltage changes smoothly across the surface. When a flaw is present, the local conductivity is reduced, which increases resistance and forces current to reroute around the damaged region. 
 
 This rerouting causes uneven voltage changes that can be detected at the surface, even though the defect itself is internal. Because voltage depends directly on how current flows through the material, small disruptions in conductivity can produce noticeable differences in the measured potential. 
 
-This study is limited by the use of a simplified two-dimensional model and idealized material properties, which do not capture all aspects of real 3D-printed metal parts. 
+Therefore, we reject the null hypothesis; flaws resulting in observable voltage differences than can be used as a diagnostic tool, subject to some conditions. This study is limited by the use of a simplified two-dimensional model and idealized material properties, which do not capture all aspects of real 3D-printed metal parts. Similarly, when using grids of different resolutions (30 by 30 and 120 by 120 in other tests), while keeping the size of the flaw relative to the grid constant, there was very little change in the observed pattern. The maximum voltage difference remained constant across different grid resolutions, which confirms grid convergence as it is independent of grid size. The spatial resolution and conductivity difference between the base material and the flaw will effect the minimum size of flaw that can be detected. 
 
 In practice, defects may have complex shapes, varying depths, and partial conductivity rather than being fully insulating. Future work could extend this approach to three-dimensional models, explore different defect sizes and conductivities, and experiment with various kinds of metals. Experimental validation using physical conductive materials or 3D-printed samples would further test the practicality of this method for real-world NDT applications. 
+
+In the future, we aim to make this process more precise by detecting the absence or presence of a flaw by testing the outer boundaries rather than interior. This is more accurate to real life since in a practical NDT situation, we only have access to the surface and not the interiors
+
+
+
 
 
 
@@ -239,13 +245,13 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 
 % Images for the biography should be a 1in wide by 1.25 high or a 5:4 aspect ratio
 % Keep your biography short and to the point or the editors will shorten it
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/yagnyeshwaran.jpeg}}]{Sagarika Yagnyeshwaran} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also an intern at Commvault in Tinton Falls, NJ, founder of the Trivia Club, member of Hackathon Leadership Team, member of concert chorus, and enjoys K- and C-dramas. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/yagnyeshwaran.jpeg}}]{Sagarika Yagnyeshwaran} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also an intern at Commvault in Tinton Falls, NJ. She enjoys heads up displays, Trivia Club, Hackathon Leadership Team, concert chorus, and streaming foreign language dramas. 
 \end{IEEEbiography}
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/lin.jpeg}}]{Jophy Lin} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also a member of Hackathon Leadership Team. She is a member of the Research Club and enjoys K- and C-dramas. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/lin.jpeg}}]{Jophy Lin} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also a member of Hackathon Leadership Team. She is a member of the Research Club and enjoys labubus, hanging out in Harvard Square, projective geometry, RNA folding, and streaming foreign language dramas. 
 \end{IEEEbiography}
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/kilaru.jpeg}}]{Rishith Kilaru} is a senior in the Science and Engineering Magnet Program at Manalapan High School. He was also an intern at WIT in Somewhere, NJ and a member of Hackathon Leadership Team. He enjoys ramen. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/kilaru.jpeg}}]{Rishith Kilaru} is a senior in the Science and Engineering Magnet Program at Manalapan High School. He was also an intern at WIT Sports in New York, and a member of Hackathon Leadership Team. When he is not building augmented reality video games, he enjoys ramen and is famous for a viral Youtube video. 
 \end{IEEEbiography}
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/dantu.jpeg}}]{Srilekha Dantu} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She enjoys working on AP Physics C E\&M and on senior projects such as low-cost intravenous weight monitoring device and a Spiderman grapple gun. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/dantu.jpeg}}]{Srilekha Dantu} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She enjoys working on AP Physics C E\&M and on senior projects such as a low-cost intravenous weight monitoring device and a Spiderman grapple gun. 
 \end{IEEEbiography}
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/ayyangar.jpeg}}]{Vijita Ayyangar} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She is an intern at I-House Architecture in Belmar, NJ and a member of the Drama Club. In her free time, she enjoys working on AP Physics C E\&M. 
 \end{IEEEbiography}
