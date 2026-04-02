@@ -1,0 +1,3 @@
+[submodule "NDT-Testing-SOR"]
+	path = NDT-Testing-SOR
+	url = git@github.com:usernnamee/NDT-Testing-SOR
