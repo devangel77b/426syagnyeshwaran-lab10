@@ -1,0 +1,17 @@
+1. This is a review of the manuscript "Detecting flaws within conductive metal using non-destructive testing techniques via the Finite Different Method" by Yagnyeshwaran, Lin, Kilaru, Dantu, and Ayyangar. I recommend minor revisions. The manuscript simulates conducting in a 2D domain, to examine if equipotentials could be used to identify cracks or flaws internal to a material. 
+
+2. The title sounds funny. There are not really any nonconductive metals, so "conductive metal" is redundant. Also, finite difference method is a numerical method, not an NDT technique. The paper is about simulating NDT numerically, but does not actually apply NDT (an actual physical technique) in a real metal sample. The title and abstract should be revised to reflect that these are numerical investigations / simulations.
+
+3. Libraries used to do the computational heavy lifting such as numpy and scipy should probably be cited properly.
+
+4. Appendix A provides a code listing. Authors should consider including some sort of pseudocode or block diagram; and the code should include syntax highlighting. Alternatively instead of including the code in the MS it should be in a github repository so readers can clone it and try it themselves, or modify for their applications.
+
+5. The plots (done in matplotlib?) should not have titles, which are taken care of by the captions for the figures. The axes are unlabeled and do not show units. Something seems off about the arrows of the electric field lines - shouldn't E run down the voltage gradient (which would be up down? rather than left right?)
+
+6. Conductivity value is not stated, nor is the need for "harmonic mean" explained sufficiently. 
+
+7. Perhaps better than spending a page on a code listing, it would be more helpful for authors to comment on if there is any effect of grid size, or the relative sizes of the flaw and hte grid, in whether the flaw has an effect on the patterns observed. Is there any nondimensional number to characterize the flaw size, conductivity, and length scale?
+
+8. Also the simulation appears to give the voltages internal to the material; a more powerful use of them for NDT purpose would be to see if teh presence or absence of the flaw can be detected by voltages only at the outer boundary (rather than in the interior). In NDT one does not have access to the interior of the part, only measurements on the surface boundary.
+
+9. The authors throw out many numerical methods such as Gauss Seidel, successive overrelaxation etc without explaining them. Probably these should be referenced to some classic numerical methods text, and a little more background given so it doesnt look like these were just copied from somewhere but are well understood by the authors.

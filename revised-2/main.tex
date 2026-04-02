@@ -1,0 +1,232 @@
+\documentclass[reprint,amsmath,amssymb,aps]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{siunitx}
+\sisetup{separate-uncertainty=true}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
+\usepackage{cleveref}
+\crefname{equation}{}{}
+\crefname{figure}{Fig.}{Figs.}
+\crefname{table}{Table}{Tables}
+\usepackage{svg}
+\usepackage{float}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+\allowdisplaybreaks
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,        
+  xleftmargin=2em,      
+  showstringspaces=false,
+  tabsize=2
+}
+
+
+
+\begin{document}
+
+\title{Numerical Simulation of Electrical Non-Destructive Testing of Metals for Flaw Detection via the Finite Difference Method}
+
+\author{Jophy Lin}
+\email{Contact author: 126jlin@frhsd.com}
+\author{Sagarika Yagnyeshwaran}
+\author{Rishith Kilaru}
+\author{Srilekha Dantu}
+\author{Vijita Ayyangar}
+
+\affiliation{Science \& Engineering Magnet Program, \href{https://manalapan.frhsd.com/}{Manalapan High School}, Englishtown, NJ 07726 USA}
+\date{\today}
+
+\begin{abstract}
+
+The detection of internal flaws in a 3D-printed metal sample was simulated using a non-destructive testing (NDT) approach on a 2D grid. A finite difference method on a square grid of size 60 nodes was used to compute the electric potential across the material, and Successive Over-Relaxation (SOR) was applied to efficiently solve the linear equations. By iterating over the finite difference grid and updating the electric potential at each point until a set tolerance was reached, changes in voltage across the material became apparent. Regions with significant positive and negative voltage deviations indicated the presence and location of a crack near the center of the domain of the conductivity map. This method matters because it demonstrates how computational techniques can be used to detect defects in metal components without physically damaging them, which is useful in manufacturing and materials inspection.
+
+\end{abstract}
+
+\keywords{keywords here}
+
+\maketitle
+
+\section{Introduction}
+
+3D printing conductive materials, including metals and conductive polymers, allows for complex designs and rapid production, but can introduce internal defects. These include cracks and incomplete bonding between layers. These flaws may significantly degrade mechanical strength or electrical performance while remaining invisible to external inspection \cite{1}.
+
+Common non-destructive testing (NDT) techniques, such as X-ray imaging or ultrasonic inspection, often require specialized equipment or a multitude of expenditures that may not be available in testing environments \cite{2}. As a result, simpler and more accessible methods for defect detection are in demand.
+
+Electrical probing provides a potential alternative, as internal changes in conductivity could alter current paths and voltage distributions \cite{3}. Because voltage can be measured at the surface of a metal, internal defects may be detected indirectly through imperfections in the observed voltage field.
+
+In this work, the feasibility of electrical non-destructive testing is investigated using a finite-difference computational model of steady-state conduction. By comparing voltage distributions in a uniform conductive sheet to those obtained in the presence of an internal low-conductivity defect, localized voltage perturbations are identified. These deviations from the baseline voltage field indicate the presence and approximate location of internal flaws.
+
+The following is the hypothesis being tested in this experiment: if there is no flaw, there should be no measurable change in voltage:
+\begin{equation} 
+    H_0: \Delta V = V_{flaw} - V_{clean} = 0
+\end{equation}
+In the case that the flaw exists, the voltage distribution changes, showing a measurable disruption in the surface of the material. This can be modeled by the following equation:
+\begin{equation}
+    H_1: \Delta V = V_{flaw} - V_{clean} \neq 0
+\end{equation}
+
+\section{Methods and materials}
+
+Under steady-state conditions and in the absence of internal current, electrical conduction in a material with varying conductivity $\sigma(x,y)$ is governed by
+
+\begin{equation}
+    \nabla \cdot (\sigma \nabla V) = 0
+\end{equation} \label{conductivity equation}
+
+where V(x,y) is the electric potential. The material was assumed to be isotropic, and time-dependent factors were neglected.
+
+The conductive domain was modeled as a two-dimensional square region on a uniform 60-node $\times$ 60-node finite-difference grid. This was to ensure that each node was relatively small compared to the simulated piece of metal, similar to how a real piece of metal has near-infinitely small particles. All voltages were evaluated at the grid nodes, with uniform spacing between each node for simplicity.
+
+Fixed-potential (Dirichlet) boundary conditions were applied on the left and right boundaries of the domain, with voltages of 1.0 V and 0.0 V, respectively, representing the source and sink electrodes. The top and bottom boundaries were treated as electrically insulating by enforcing zero normal voltage gradients. Together, these boundaries establish a controlled voltage field across the metal, allowing the low-conductivity regions to locally distort the voltage field.
+
+To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawless material was set constant to 1.0, while the conductivity of the flawed regions was set constant to $10^{-3}$, both in normalized units. 
+
+The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. The harmonic mean was used because it models how current flows across materials with varying conductivities. Current is slowed down by the poorly conductive region, which is the crack, and so by taking the harmonic mean, the weight is shifted towards the smaller value. This method allows us to ensure that the current is conserved and prevents the overestimation of conductivity at the boundaries by clearly showing the defect. 
+
+Since we needed to find the voltage at all 3600 points, we would either use the Jacobi method or the Gauss-Seidel \cite{4} method to solve the resulting system of linear equations. The Gauss-Seidel method updates the nodes individually based on the neighboring nodes, whereas the Jacobi method updates all nodes simultaneously using values from the previous iteration, making the Jacobi method computationally expensive. This is why the Gauss-Seidel method was implemented, where each calculation uses updated information rather than waiting for an entire iteration through the grid; the formula below was used to update the voltage of each node:
+\vspace{1em}
+\scriptsize
+\begin{equation} 
+V_{i,j}^{(\mathrm{GS})} = \frac{\sigma_{i+\frac{1}{2},j} \, V_{i+1,j} + \sigma_{i-\frac{1}{2},j} \, V_{i-1,j} + \sigma_{i,j+\frac{1}{2}} \, V_{i,j+1} + \sigma_{i,j-\frac{1}{2}} \, V_{i,j-1}}{\sigma_{i+\frac{1}{2},j} + \sigma_{i-\frac{1}{2},j} + \sigma_{i,j+\frac{1}{2}} + \sigma_{i,j-\frac{1}{2}}}
+\end{equation}
+\label{Gauss-Seidel update formula}
+\vspace{0.5em}
+\normalsize
+
+Successive-Over-Relaxation \cite{5} (SOR) is the process of iteratively solving systems of linear equations by accelerating the convergence of the Gauss-Seidel Method. In order to further optimize and increase the speed of the program, we used the Successive-Over-Relaxation (SOR) technique until the maximum change in voltage between iterations fell below $1.0 \times 10^{-6}$ using the below formula:
+
+
+\begin{equation} 
+    V_{i,j}^{(n+1)} = (1-\omega)V_{i,j}^{(n)} + \omega V_{i,j}^{(\mathrm{GS})}
+\end{equation}
+\vspace{0.5em} 
+
+
+The electric field was computed from the converged voltage distribution using:
+\begin{equation}
+    E = -\nabla V
+\end{equation} \label{Electric field}
+To isolate the perturbations induced by the defects, the voltage difference field was calculated as such:
+
+\begin{equation} \Delta V = V_{flaw} - V_{clean} \end{equation}\label{Voltage difference field}
+The voltage difference field was then analyzed as the primary non-destructive testing signal. Numerical computations were performed using NumPy \cite{6} and results were visualized using Matplotlib \cite{7}.
+
+\section{Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1 \linewidth]{noflaw.png}
+    \caption{Electric potential distribution for a uniform conductive sheet with no internal flaw.}
+    \label{fig:results}
+\end{figure}
+
+The electric potential is shown in \cref{fig:results} for a uniform 3D-printed metal with no internal flaw present. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{flawpotential.png}
+    \caption{Electric potential distribution for a conductive sheet containing a low-conductivity flaw.}
+    \label{fig:flaw}
+\end{figure} 
+The potential distribution after adding a flaw is shown in \cref{fig:flaw}, with arrows representing the potential field lines that outline the shape of the flaw and defect. In this simulation, the flaw is a thin, vertical crack. 
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{voltagedifference.png}
+    \caption{Voltage difference ($\Delta V$) between the defect-free and defective cases, serving as the electrical NDT signal.}
+    \label{fig: voltage difference}
+\end{figure} 
+
+ \cref{fig: voltage difference} shows the voltage difference, evidently highlighting the location at which there is an internal flaw. The blue voltage difference represents a location at which the voltage drops and the current is rerouted, whereas the red voltage difference represents a location at which the voltage is higher than expected, and the current is being impeded upstream.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{conductivitymap.png}
+    \caption{Conductivity map of the simulated conductive sheet showing the location and geometry of the introduced flaw.}
+    \label{fig:conductivity map}
+\end{figure}
+
+The shape of the flaw inserted into the surface of the metallic material is depicted in \cref{fig:conductivity map}. 
+
+These results support the idea that electrical probing is a viable non-destructive testing method for conductive 3D-printed materials, as changes in voltage reflect hidden disruptions in conductivity without physically damaging the part to test for imperfections. 
+
+
+\section{Discussion}
+
+The behavior observed in this study can be explained by how electric current responds to changes in conductivity within a material.
+
+In a conductive sheet with no defects, current distributes evenly and the voltage changes smoothly across the surface. When a flaw is present, the local conductivity is reduced, which increases resistance and forces current to reroute around the damaged region. 
+
+This rerouting causes uneven voltage changes that can be detected at the surface, even though the defect itself is internal. Because voltage depends directly on how current flows through the material, small disruptions in conductivity can produce noticeable differences in the measured potential. 
+
+Therefore, we reject the null hypothesis.
+
+This study is limited by the use of a simplified two-dimensional model and idealized material properties, which do not capture all aspects of real 3D-printed metal parts. 
+
+Similarly, when using grids of different resolutions (30 by 30 and 120 by 120 in other tests), while keeping the size of the flaw relative to the grid constant, there was very little change in the observed pattern. The maximum voltage difference remained constant across different grid resolutions, which confirms grid convergence as it is independent of grid size.
+
+In practice, defects may have complex shapes, varying depths, and partial conductivity rather than being fully insulating. Future work could extend this approach to three-dimensional models, explore different defect sizes and conductivities, and experiment with various kinds of metals. Experimental validation using physical conductive materials or 3D-printed samples would further test the practicality of this method for real-world NDT applications. 
+
+In the future, we aim to make this process  more precise by detecting the absence or presence of a flaw by testing the outer boundaries rather than interior. This is more accurate to real life since in NDT, we only have access to the surface and not the interiors
+
+\section{Acknowledgements} 
+
+The team thanks all group members for their collaborative contributions to this work, including code development, simulation design, and manuscript writing. This work was made possible through close teamwork and collaboration among all group members throughout the research and writing process. 
+
+Additionally, the team acknowledges the Science and Engineering Magnet Program for providing access to the Jupyter Notebook computing environment used to develop, run, and test the simulations. Lastly, the team would like to thank all peers who have provided constructive feedback and review, helping improve the quality of this work. 
+
+\appendix
+\section{Implementation Code}
+The Python code has been added to a GitHub repository which can be accessed below:
+
+\url{https://github.com/usernnamee/NDT-Testing-SOR}.
+
+\begin{thebibliography}{}
+\bibitem{1}
+N.~Dalal, Y.~Gu, D.~R.~Hines, A.~Dasgupta, and S.~Das,
+``Cracks in the 3D-printed conductive traces of silver nanoparticle ink,'' \textit{Journal of Micromechanics and Microengineering}, vol.~29, no.~9, pp.~097001--097001, Jul.~2019, doi:~10.1088/1361-6439/ab2f25.
+
+\bibitem{2}
+P.~Cawley, ``Non-destructive testing---current capabilities and future directions,'' \textit{Proceedings of the Institution of Mechanical Engineers, Part L: Journal of Materials: Design and Applications}, vol.~215, no.~4, pp.~213--223, Oct.~2001,
+doi:~10.1177/146442070121500403.
+
+\bibitem{3}
+A.~Hauptmann, M.~Ikehata, H.~Itou, and S.~Siltanen,
+``Revealing cracks inside conductive bodies by electric surface measurements,'' \textit{Inverse Problems}, vol.~35, no.~2, p.~025004, Dec.~2018, doi:~10.1088/1361-6420/aaf273.
+
+\bibitem{4}
+M.~EL~Hajji,
+``Gauss-Seidel Method,'' \textit{Math-Linux.com}, 2024.
+Available: \url{https://www.math-linux.com/mathematics/linear-systems/article/gauss-seidel-method}
+
+\bibitem{5}
+CFD-Online,
+``Successive Over-Relaxation Method --- SOR,'' \textit{CFD-Online Wiki}.
+Available: \url{https://www.cfd-online.com/Wiki/Successive_over-relaxation_method_-_SOR}
+
+\bibitem{6}
+C.~R.~Harris, K.~J.~Millman, S.~J.~van~der~Walt \textit{et al.},
+``Array programming with NumPy,'' \textit{Nature}, vol.~585, pp.~357--362, 2020, doi:~10.1038/s41586-020-2649-2.
+
+\bibitem{7}
+J.~D.~Hunter,
+``Matplotlib: A 2D graphics environment,'' \textit{Computing in Science  $\And$ Engineering}, vol.~9, no.~3, pp.~90--95, 2007, doi:~10.1109/MCSE.2007.55.
+
+
+\end{thebibliography}
+
+\end{document}
+
