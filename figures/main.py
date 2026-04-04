@@ -114,7 +114,7 @@ def add_arrowheads(ax, stream, color="white", lw=1.0):
         (x0, y0), (x1, y1) = seg[0], seg[1]
 
         ax.annotate(
-            "",
+            r"",
             xy=(x1, y1),
             xytext=(x0, y0),
             arrowprops=dict(
@@ -138,71 +138,102 @@ for N in [30, 60, 120]:
     Ex_clean, Ey_clean = e_field(V_clean)
     Ex_flaw, Ey_flaw = e_field(V_flaw)
 
-    fig, axs = plt.subplots(1, 4, figsize=(13.6668, 2), dpi=600, constrained_layout=True)
+    #fig, axs = plt.subplots(1, 4, figsize=(13.6668, 2), dpi=600, constrained_layout=True)
+    
+
 
     x = np.arange(N)
     y = np.arange(N)
     X, Y = np.meshgrid(x, y)
 
     # potential plot with no flaw
-    im0 = axs[0].imshow(V_clean, origin="lower", cmap="viridis", vmin=0, vmax=1,
-                        extent=[0, N-1, 0, N-1])
-
-    s0 = axs[0].streamplot(X, Y, Ex_clean, Ey_clean,
-                           density=0.6, linewidth=0.9,
-                           color=(1,1,1,0.75), arrowstyle='-')
-
-    add_arrowheads(axs[0], s0, color=(1,1,1,0.9), lw=1.0)
+    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    im0 = ax.imshow(V_clean, origin="lower", cmap="viridis", vmin=0, vmax=1,
+                    extent=[0, N-1, 0, N-1],rasterized=False)
+    s0 = ax.streamplot(X, Y, Ex_clean, Ey_clean,
+                       density=0.6, linewidth=0.9,
+                       color=(1,1,1,0.75), arrowstyle='-')
+    add_arrowheads(ax, s0, color=(1,1,1,0.9), lw=1.0)
 
     #axs[0].set_title(f"Clean (N={N})")
-    axs[0].set_xlabel(r"$x$, nodes")
-    axs[0].set_ylabel(r"$y$, nodes")
+    ax.set_xlabel(r'$x$, nodes',parse_math=False)
+    ax.set_ylabel(r'$y$, nodes',parse_math=False)
 
-    cb0 = plt.colorbar(im0, ax=axs[0])
-    cb0.set_label(r"$V$ (V)")
+    cb0 = plt.colorbar(im0, ax=ax)
+    cb0.set_label(r'$V$, \unit{\volt}',parse_math=False)
+
+    #fig.tight_layout()
+    fig.savefig('potential-noflaw-{0}.svg'.format(N))
+    fig.savefig('potential-noflaw-{0}.png'.format(N),dpi=1200)
+    plt.close(fig)
+
+    
 
     # potential plot with flaw
-    im1 = axs[1].imshow(V_flaw, origin="lower", cmap="viridis", vmin=0, vmax=1,
-                        extent=[0, N-1, 0, N-1])
-
-    s1 = axs[1].streamplot(X, Y, Ex_flaw, Ey_flaw,
-                           density=0.6, linewidth=0.9,
-                           color=(1,1,1,0.75), arrowstyle='-')
-
-    add_arrowheads(axs[1], s1, color=(1,1,1,0.9), lw=1.0)
+    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    im1 = ax.imshow(V_flaw, origin="lower", cmap="viridis", vmin=0, vmax=1,
+                    extent=[0, N-1, 0, N-1],rasterized=False)
+    s1 = ax.streamplot(X, Y, Ex_flaw, Ey_flaw,
+                       density=0.6, linewidth=0.9,
+                       color=(1,1,1,0.75), arrowstyle='-')
+    add_arrowheads(ax, s1, color=(1,1,1,0.9), lw=1.0)
 
     #axs[1].set_title(f"Flaw (N={N})")
-    axs[1].set_xlabel(r"$x$, nodes")
-    axs[1].set_ylabel(r"$y$, nodes")
+    ax.set_xlabel(r'$x$, nodes',parse_math=False)
+    ax.set_ylabel(r'$y$, nodes',parse_math=False)
 
-    cb1 = plt.colorbar(im1, ax=axs[1])
-    cb1.set_label(r"$V$, \unit{\volt}")
+    cb1 = plt.colorbar(im1, ax=ax)
+    cb1.set_label(r'$V$, \unit{\volt}',parse_math=False)
 
+    #fig.tight_layout()
+    fig.savefig('potential-flaw-{0}.svg'.format(N))
+    fig.savefig('potential-flaw-{0}.png'.format(N),dpi=1200)
+    plt.close(fig)
+
+
+
+    
+    
     # voltage differnce plot
+    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
     dvmax = np.max(np.abs(V_diff))
 
-    im2 = axs[2].imshow(V_diff, origin="lower", cmap="seismic",
-                        vmin=-dvmax, vmax=dvmax,
-                        extent=[0, N-1, 0, N-1])
+    im2 = ax.imshow(V_diff, origin="lower", cmap="seismic",
+                    vmin=-dvmax, vmax=dvmax,
+                    extent=[0, N-1, 0, N-1],rasterized=False)
 
     #axs[2].set_title(f"ΔV (N={N})")
-    axs[2].set_xlabel(r"$x$, nodes")
-    axs[2].set_ylabel(r"$y$, nodes")
+    ax.set_xlabel(r'$x$, nodes',parse_math=False)
+    ax.set_ylabel(r'$y$, nodes',parse_math=False)
 
-    cb2 = plt.colorbar(im2, ax=axs[2])
-    cb2.set_label(r"$\Delta V$, \unit{\volt}")
+    cb2 = plt.colorbar(im2, ax=ax)
+    cb2.set_label(r'$\Delta V$, \unit{\volt}',parse_math=False)
 
+    #fig.tight_layout()
+    fig.savefig('potential-difference-{0}.svg'.format(N))
+    fig.savefig('potential-difference-{0}.png'.format(N),dpi=1200)
+    plt.close(fig)
+
+
+
+    
     # conductivity plot
-    im3 = axs[3].imshow(sig_flaw, origin="lower", cmap="gray_r",
-                        extent=[0, N-1, 0, N-1])
+    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    im3 = ax.imshow(sig_flaw, origin="lower", cmap="gray_r",
+                    extent=[0, N-1, 0, N-1],rasterized=False)
 
     #axs[3].set_title(f"Conductivity (N={N})")
-    axs[3].set_xlabel(r"$x$, nodes")
-    axs[3].set_ylabel(r"$y$, nodes")
+    ax.set_xlabel(r'$x$, nodes',parse_math=False)
+    ax.set_ylabel(r'$y$, nodes',parse_math=False)
 
-    cb3 = plt.colorbar(im3, ax=axs[3])
-    cb3.set_label(r"conductivity $\sigma$, normalized")
+    cb3 = plt.colorbar(im3, ax=ax)
+    cb3.set_label(r'conductivity $\sigma$, normalized',parse_math=False)
 
-    plt.savefig(f"interior_fieldsig_{N}.svg")
-    plt.savefig(f"interior_fieldsig_{N}.png", dpi=600)
-    plt.show()
+    #fig.tight_layout()
+    fig.savefig('conductivity-{0}.svg'.format(N))
+    fig.savefig('conductivity-{0}.png'.format(N),dpi=1200)
+    plt.close(fig)
+
+    #plt.savefig(f"interior_fieldsig_{N}.svg")
+    #plt.savefig(f"interior_fieldsig_{N}.png", dpi=600)
+    #plt.show()
