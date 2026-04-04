@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-plt.rcParams['text.usetex']=False
-plt.rcParams['svg.fonttype']='none'
-plt.rcParams['font.size']=8
+#plt.rcParams['text.usetex']=True
+#plt.rcParams['svg.fonttype']='none'
+#plt.rcParams['font.size']=8
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Grid parameters
 iters = 8000
@@ -114,7 +115,7 @@ def add_arrowheads(ax, stream, color="white", lw=1.0):
         (x0, y0), (x1, y1) = seg[0], seg[1]
 
         ax.annotate(
-            r"",
+            "",
             xy=(x1, y1),
             xytext=(x0, y0),
             arrowprops=dict(
@@ -147,46 +148,51 @@ for N in [30, 60, 120]:
     X, Y = np.meshgrid(x, y)
 
     # potential plot with no flaw
-    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    fig,ax = plt.subplots(figsize=(5,4),dpi=1200,constrained_layout=True)
     im0 = ax.imshow(V_clean, origin="lower", cmap="viridis", vmin=0, vmax=1,
-                    extent=[0, N-1, 0, N-1],rasterized=False)
+                    extent=[0, N-1, 0, N-1])
+    #divider=make_axes_locatable(ax)
+    #cax = divider.append_axes("right",size="5%",pad=0.05)
+    cb0 = plt.colorbar(im0, ax=ax)
     s0 = ax.streamplot(X, Y, Ex_clean, Ey_clean,
                        density=0.6, linewidth=0.9,
                        color=(1,1,1,0.75), arrowstyle='-')
     add_arrowheads(ax, s0, color=(1,1,1,0.9), lw=1.0)
 
     #axs[0].set_title(f"Clean (N={N})")
-    ax.set_xlabel(r'$x$, nodes',parse_math=False)
-    ax.set_ylabel(r'$y$, nodes',parse_math=False)
+    ax.set_xlabel(r'x (nodes)',parse_math=False)
+    ax.set_ylabel(r'y (nodes)',parse_math=False)
 
-    cb0 = plt.colorbar(im0, ax=ax)
-    cb0.set_label(r'$V$, \unit{\volt}',parse_math=False)
+    cb0.set_label(r'electric potential (V)',parse_math=False)
 
     #fig.tight_layout()
-    fig.savefig('potential-noflaw-{0}.svg'.format(N))
+    #fig.savefig('potential-noflaw-{0}.svg'.format(N))
     fig.savefig('potential-noflaw-{0}.png'.format(N),dpi=1200)
     plt.close(fig)
 
     
 
     # potential plot with flaw
-    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    fig,ax = plt.subplots(figsize=(5,4),dpi=1200,layout="constrained")
     im1 = ax.imshow(V_flaw, origin="lower", cmap="viridis", vmin=0, vmax=1,
                     extent=[0, N-1, 0, N-1],rasterized=False)
+    #divider=make_axes_locatable(ax)
+    #cax = divider.append_axes("right",size="5%",pad=0.05)
+    cb1 = plt.colorbar(im1, ax=ax)
     s1 = ax.streamplot(X, Y, Ex_flaw, Ey_flaw,
                        density=0.6, linewidth=0.9,
                        color=(1,1,1,0.75), arrowstyle='-')
     add_arrowheads(ax, s1, color=(1,1,1,0.9), lw=1.0)
 
     #axs[1].set_title(f"Flaw (N={N})")
-    ax.set_xlabel(r'$x$, nodes',parse_math=False)
-    ax.set_ylabel(r'$y$, nodes',parse_math=False)
+    ax.set_xlabel(r'x (nodes)',parse_math=False)
+    ax.set_ylabel(r'y (nodes)',parse_math=False)
 
-    cb1 = plt.colorbar(im1, ax=ax)
-    cb1.set_label(r'$V$, \unit{\volt}',parse_math=False)
+
+    cb1.set_label(r'electric potential (V)',parse_math=False)
 
     #fig.tight_layout()
-    fig.savefig('potential-flaw-{0}.svg'.format(N))
+    #fig.savefig('potential-flaw-{0}.svg'.format(N))
     fig.savefig('potential-flaw-{0}.png'.format(N),dpi=1200)
     plt.close(fig)
 
@@ -195,7 +201,7 @@ for N in [30, 60, 120]:
     
     
     # voltage differnce plot
-    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    fig,ax = plt.subplots(figsize=(5,4),dpi=1200,layout="constrained")
     dvmax = np.max(np.abs(V_diff))
 
     im2 = ax.imshow(V_diff, origin="lower", cmap="seismic",
@@ -203,14 +209,16 @@ for N in [30, 60, 120]:
                     extent=[0, N-1, 0, N-1],rasterized=False)
 
     #axs[2].set_title(f"ΔV (N={N})")
-    ax.set_xlabel(r'$x$, nodes',parse_math=False)
-    ax.set_ylabel(r'$y$, nodes',parse_math=False)
-
+    ax.set_xlabel(r'x (nodes)',parse_math=False)
+    ax.set_ylabel(r'y (nodes)',parse_math=False)
+    
+    #divider=make_axes_locatable(ax)
+    #cax = divider.append_axes("right",size="5%",pad=0.05)
     cb2 = plt.colorbar(im2, ax=ax)
-    cb2.set_label(r'$\Delta V$, \unit{\volt}',parse_math=False)
+    cb2.set_label(r'electric potential (V)',parse_math=False)
 
     #fig.tight_layout()
-    fig.savefig('potential-difference-{0}.svg'.format(N))
+    #fig.savefig('potential-difference-{0}.svg'.format(N))
     fig.savefig('potential-difference-{0}.png'.format(N),dpi=1200)
     plt.close(fig)
 
@@ -218,19 +226,21 @@ for N in [30, 60, 120]:
 
     
     # conductivity plot
-    fig,ax = plt.subplots(figsize=(3.4167,3),dpi=1200,layout="constrained")
+    fig,ax = plt.subplots(figsize=(5,4),dpi=1200,layout="constrained")
     im3 = ax.imshow(sig_flaw, origin="lower", cmap="gray_r",
                     extent=[0, N-1, 0, N-1],rasterized=False)
 
     #axs[3].set_title(f"Conductivity (N={N})")
-    ax.set_xlabel(r'$x$, nodes',parse_math=False)
-    ax.set_ylabel(r'$y$, nodes',parse_math=False)
+    ax.set_xlabel(r'x (nodes)',parse_math=False)
+    ax.set_ylabel(r'y (nodes)',parse_math=False)
 
+    #divider=make_axes_locatable(ax)
+    #cax = divider.append_axes("right",size="5%",pad=0.05)
     cb3 = plt.colorbar(im3, ax=ax)
-    cb3.set_label(r'conductivity $\sigma$, normalized',parse_math=False)
+    cb3.set_label(r'conductivity (normalized)',parse_math=False)
 
     #fig.tight_layout()
-    fig.savefig('conductivity-{0}.svg'.format(N))
+    #fig.savefig('conductivity-{0}.svg'.format(N))
     fig.savefig('conductivity-{0}.png'.format(N),dpi=1200)
     plt.close(fig)
 
