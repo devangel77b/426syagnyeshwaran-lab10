@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.rcParams['text.usetex']=False
+plt.rcParams['svg.fonttype']='none'
+plt.rcParams['font.size']=8
 
 # Grid parameters
 iters = 8000
@@ -19,7 +22,7 @@ def e_field(V, hx=1.0, hy=1.0):
     Ey = -dVdi
     return Ex, Ey
 
-# solve for conductance over the whole field using SOR
+# solve for conductance s and voltage V over the whole field using SOR
 def conductance(Nx=60, Ny=60, isFlawed=False, omega=1.8):
 
     s = np.ones((Nx, Ny)) * sig_BULK
@@ -59,6 +62,7 @@ def conductance(Nx=60, Ny=60, isFlawed=False, omega=1.8):
             for j in range(1, Ny - 1):
 
                 # if the voltage is fixed already move on
+                # nb this is not quite an insulating bc it is a pinned bc
                 if fixed[i, j]:
                     continue
 
@@ -75,11 +79,13 @@ def conductance(Nx=60, Ny=60, isFlawed=False, omega=1.8):
                 if A < 1e-20:
                     continue
 
+                # Gauss-Seidel here
                 V_next = (
                     sxp * V[ip, j] + sxm * V[im, j] +
                     syp * V[i, jp] + sym * V[i, jm]
                 ) / A
 
+                # Successive Over Relaxation here
                 V_prev = V[i, j]
                 V[i, j] = (1.0 - omega) * V_prev + omega * V_next
 
@@ -132,7 +138,7 @@ for N in [30, 60, 120]:
     Ex_clean, Ey_clean = e_field(V_clean)
     Ex_flaw, Ey_flaw = e_field(V_flaw)
 
-    fig, axs = plt.subplots(1, 4, figsize=(22, 4), constrained_layout=True)
+    fig, axs = plt.subplots(1, 4, figsize=(13.6668, 2), dpi=600, constrained_layout=True)
 
     x = np.arange(N)
     y = np.arange(N)
@@ -149,11 +155,11 @@ for N in [30, 60, 120]:
     add_arrowheads(axs[0], s0, color=(1,1,1,0.9), lw=1.0)
 
     #axs[0].set_title(f"Clean (N={N})")
-    axs[0].set_xlabel("x (nodes)")
-    axs[0].set_ylabel("y (nodes)")
+    axs[0].set_xlabel(r"$x$, nodes")
+    axs[0].set_ylabel(r"$y$, nodes")
 
     cb0 = plt.colorbar(im0, ax=axs[0])
-    cb0.set_label("Electric potential (V)")
+    cb0.set_label(r"$V$ (V)")
 
     # potential plot with flaw
     im1 = axs[1].imshow(V_flaw, origin="lower", cmap="viridis", vmin=0, vmax=1,
@@ -166,11 +172,11 @@ for N in [30, 60, 120]:
     add_arrowheads(axs[1], s1, color=(1,1,1,0.9), lw=1.0)
 
     #axs[1].set_title(f"Flaw (N={N})")
-    axs[1].set_xlabel("x (nodes)")
-    axs[1].set_ylabel("y (nodes)")
+    axs[1].set_xlabel(r"$x$, nodes")
+    axs[1].set_ylabel(r"$y$, nodes")
 
     cb1 = plt.colorbar(im1, ax=axs[1])
-    cb1.set_label("Electric potential (V)")
+    cb1.set_label(r"$V$, \unit{\volt}")
 
     # voltage differnce plot
     dvmax = np.max(np.abs(V_diff))
@@ -180,22 +186,23 @@ for N in [30, 60, 120]:
                         extent=[0, N-1, 0, N-1])
 
     #axs[2].set_title(f"ΔV (N={N})")
-    axs[2].set_xlabel("x (nodes)")
-    axs[2].set_ylabel("y (nodes)")
+    axs[2].set_xlabel(r"$x$, nodes")
+    axs[2].set_ylabel(r"$y$, nodes")
 
     cb2 = plt.colorbar(im2, ax=axs[2])
-    cb2.set_label("ΔV (V)")
+    cb2.set_label(r"$\Delta V$, \unit{\volt}")
 
     # conductivity plot
     im3 = axs[3].imshow(sig_flaw, origin="lower", cmap="gray_r",
                         extent=[0, N-1, 0, N-1])
 
     #axs[3].set_title(f"Conductivity (N={N})")
-    axs[3].set_xlabel("x (nodes)")
-    axs[3].set_ylabel("y (nodes)")
+    axs[3].set_xlabel(r"$x$, nodes")
+    axs[3].set_ylabel(r"$y$, nodes")
 
     cb3 = plt.colorbar(im3, ax=axs[3])
-    cb3.set_label("Conductivity (normalized)")
+    cb3.set_label(r"conductivity $\sigma$, normalized")
 
-    plt.savefig(f"interior_fieldsig_{N}.png", dpi=150, bbox_inches="tight")
+    plt.savefig(f"interior_fieldsig_{N}.svg")
+    plt.savefig(f"interior_fieldsig_{N}.png", dpi=600)
     plt.show()
