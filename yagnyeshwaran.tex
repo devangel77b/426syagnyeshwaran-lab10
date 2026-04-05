@@ -28,7 +28,7 @@
 \usepackage[utf8]{inputenc}
 \DeclareUnicodeCharacter{2212}{\ensuremath{-}}
 
-
+\usepackage{minted}
 %\usepackage{float}
 %\usepackage{verbatim}
 %\usepackage{listings}
@@ -131,7 +131,7 @@ The conductive domain was modeled as a two-dimensional square region on a unifor
 
 Fixed-potential (Dirichlet) boundary conditions were applied on the left and right boundaries of the domain, with voltages of \qty{1.0}{\volt} and \qty{0.0}{\volt}, respectively, representing the source and sink electrodes. The top and bottom boundaries were treated as electrically insulating by enforcing zero normal voltage gradients. Together, these boundaries establish a controlled voltage field across the metal, allowing the low-conductivity regions to locally distort the voltage field.
 
-To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawless material was set constant to \num{1.0}, while the conductivity of the flawed regions was set constant to \num{1e-3}, both in normalized units. 
+To simulate defects in the metal, we modeled localized regions of lower electrical conductivity. Because a flawless piece of metal that has no defects would be uniformly conductive, the lower conductivity represents the absence of metal, which is the gaps and cracks in a real piece of metal. The conductivity of the flawless material was set constant to \num{1.0}, while the conductivity of the flawed regions was set constant to \num{1e-9}, both in normalized units. 
 
 The governing equation was discretized using a finite-difference formulation that enforces current conservation at each grid node. Conductivity at cell interfaces was computed using the harmonic mean to accurately represent sharp conductivity contrasts. The harmonic mean was used because it models how current flows across materials with varying conductivities. Current is slowed down by the poorly conductive region, which is the crack, and so by taking the harmonic mean, the weight is shifted towards the smaller value. This method allows us to ensure that the current is conserved and prevents the overestimation of conductivity at the boundaries by clearly showing the defect. 
 
@@ -168,7 +168,7 @@ The voltage difference field was then analyzed as the primary non-destructive te
 \begin{center}
 %\includegraphics[width=\columnwidth]{figures/noflaw.png}
 %\includesvg[width=\columnwidth]{potential-noflaw-60}
-\includegraphics[width=\columnwidth]{figures/potential-noflaw-60.png}
+\includegraphics[width=\columnwidth]{figures/potential-noflaw.png}
 \end{center}
 \caption{Electric potential distribution for a uniform conductive sheet with no internal flaw.}
 \label{fig:results}
@@ -180,7 +180,7 @@ The electric potential is shown in \cref{fig:results} for a uniform 3D-printed m
 \begin{center}
 %\includegraphics[width=\columnwidth]{figures/flawpotential.png}
 %\includesvg[width=\columnwidth]{potential-flaw-60}
-\includegraphics[width=\columnwidth]{figures/potential-flaw-60.png}
+\includegraphics[width=\columnwidth]{figures/potential-flaw.png}
 \end{center}
 \caption{Electric potential distribution for a conductive sheet containing a low-conductivity flaw.}
 \label{fig:flaw}
@@ -192,7 +192,7 @@ The potential distribution after adding a flaw is shown in \cref{fig:flaw}, with
 \begin{center}
 %\includegraphics[width=\columnwidth]{figures/voltagedifference.png}
 %\includesvg[width=\columnwidth]{potential-difference-60}
-\includegraphics[width=\columnwidth]{figures/potential-difference-60.png}
+\includegraphics[width=\columnwidth]{figures/potential-difference.png}
 \end{center}
 \caption{Voltage difference ($\Delta V$) between the defect-free and defective cases, serving as the electrical NDT signal.}
 \label{fig: voltage difference}
@@ -204,7 +204,7 @@ The potential distribution after adding a flaw is shown in \cref{fig:flaw}, with
 \begin{center}
 %\includegraphics[width=\columnwidth]{figures/conductivitymap.png}
 %\includesvg[width=\columnwidth]{conductivity-60}
-\includegraphics[width=\columnwidth]{figures/conductivity-60.png}
+\includegraphics[width=\columnwidth]{figures/conductivity.png}
 \end{center}
 \caption{Conductivity map of the simulated conductive sheet showing the location and geometry of the introduced flaw.}
 \label{fig:conductivity map}
@@ -249,6 +249,11 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 
 
 
+\appendix
+\section{Implementation code}
+The following Python code was used to implement the finite-difference solver, apply boundary conditions, compute the electrical field, and generate \cref{fig:results,fig:flaw,fig: voltage difference,fig:conductivity map}. The code makes use of the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. Relaxation or Gauss-Seidel is implemented around line 59, while successive over-relaxation is implemented around line 62 \cite{press:1992:numerical}.
+\inputminted[fontsize=\scriptsize,linenos,breaklines]{python}{figures/main2.py}
+
 
 
 
@@ -258,11 +263,12 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 
 % Images for the biography should be a 1in wide by 1.25 high or a 5:4 aspect ratio
 % Keep your biography short and to the point or the editors will shorten it
+\newpage
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/lin.jpeg}}]{Jophy Lin} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also a member of Hackathon Leadership Team. She is a member of the Research Club and enjoys labubus, hanging out in Harvard Square, projective geometry, RNA folding, and streaming foreign language dramas. 
 \end{IEEEbiography}
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/yagnyeshwaran.jpeg}}]{Sagarika Yagnyeshwaran} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She was also an intern at Commvault in Tinton Falls, NJ. She enjoys heads up displays, Trivia Club, Hackathon Leadership Team, concert chorus, and streaming foreign language dramas. 
 \end{IEEEbiography}
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/kilaru.jpeg}}]{Rishith Kilaru} is a senior in the Science and Engineering Magnet Program at Manalapan High School. He was also an intern at WIT Sports in New York, and a member of Hackathon Leadership Team. When he is not building augmented reality video games, he enjoys ramen and is famous for a viral Youtube video. 
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/kilaru.jpeg}}]{Rishith Kilaru} is a senior in the Science and Engineering Magnet Program at Manalapan High School. He was also an intern at WIT Sports in New York, and a member of Hackathon Leadership Team. When he is not building augmented reality video games, he enjoys karaoke and ramen and is famous for a viral Youtube video. 
 \end{IEEEbiography}
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{figures/dantu.jpeg}}]{Srilekha Dantu} is a senior in the Science and Engineering Magnet Program at Manalapan High School. She enjoys working on AP Physics C E\&M and on senior projects such as a low-cost intravenous weight monitoring device and a Spiderman grapple gun. 
 \end{IEEEbiography}
@@ -285,9 +291,6 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 
 
 
-%\appendix
-%\section{Implementation Code}
-%The following Python code was used to implement the finite-difference solver, apply boundary conditions, compute the electrical field, and generate the simulation figures presented in this work.
 %
 %\begin{lstlisting}
 %
