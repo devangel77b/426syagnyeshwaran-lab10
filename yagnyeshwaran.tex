@@ -29,6 +29,9 @@
 %\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
 
 \usepackage{minted}
+\setminted{fontsize=\scriptsize,
+	linenos,breaklines,
+	xleftmargin=10pt,numbersep=4pt}
 %\usepackage{float}
 %\usepackage{verbatim}
 %\usepackage{listings}
@@ -100,7 +103,7 @@ Common non-destructive testing (NDT) techniques, such as x-ray imaging or ultras
 
 Electrical probing provides a potential alternative, as internal changes in conductivity could alter current paths and voltage distributions \cite{hauptmann:2018:revealing}. Because voltage can be measured at the surface of a metal, internal defects may be detected indirectly through imperfections in the observed voltage field.
 
-Citations here \cite{ayyagari:2024:computational,baru:2024:demonstrating,cohen:2024:visualizing,edwards:2024:electric,kumar:2024:mapping}. 
+Previous researchers examined voltage mapping to experimentally characterize the equipotentials and electric fields within a low-cost gel electrophoresis device \cite{ayyagari:2024:computational,baru:2024:demonstrating,cohen:2024:visualizing,edwards:2024:electric,kumar:2024:mapping}. However, this previous work did not attempt numerical simulation. 
 
 In this work, the feasibility of electrical non-destructive testing is investigated using a finite-difference computational model of steady-state conduction \cite{press:1992:numerical}. By comparing voltage distributions in a uniform conductive sheet to those obtained in the presence of an internal low-conductivity defect, localized voltage perturbations are identified. These deviations from the baseline voltage field indicate the presence and approximate location of internal flaws.
 
@@ -124,10 +127,9 @@ Under steady-state conditions and in the absence of internal current, electrical
 \vec{\nabla} \cdot (\sigma \vec{\nabla} V) = 0
 \label{conductivity equation}
 \end{equation} 
+where $V(x,y)$ is the electric potential. The material was assumed to be isotropic, and time-dependent factors were neglected. 
 
-where $V(x,y)$ is the electric potential. The material was assumed to be isotropic, and time-dependent factors were neglected.
-
-The conductive domain was modeled as a two-dimensional square region on a uniform \qtyproduct{60 x 60}{node} finite-difference grid. This was to ensure that each node was relatively small compared to the simulated piece of metal, similar to how a real piece of metal has near-infinitely small particles. All voltages were evaluated at the grid nodes, with uniform spacing between each node for simplicity.
+The conductive domain was modeled as a two-dimensional square region on a regular uniform \qtyproduct{60 x 60}{node} finite-difference grid. This was to ensure that each node was relatively small compared to the simulated piece of metal, similar to how a real piece of metal has near-infinitely small particles. All voltages were evaluated at the grid nodes, with uniform spacing between each node for simplicity.
 
 Fixed-potential (Dirichlet) boundary conditions were applied on the left and right boundaries of the domain, with voltages of \qty{1.0}{\volt} and \qty{0.0}{\volt}, respectively, representing the source and sink electrodes. The top and bottom boundaries were treated as electrically insulating by enforcing zero normal voltage gradients. Together, these boundaries establish a controlled voltage field across the metal, allowing the low-conductivity regions to locally distort the voltage field.
 
@@ -156,7 +158,7 @@ To isolate the perturbations induced by the defects, the voltage difference fiel
 \Delta V = V_{flaw} - V_{clean} 
 \label{Voltage difference field}
 \end{equation}
-The voltage difference field was then analyzed as the primary non-destructive testing signal. Numerical computations were performed in Python using the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. A Jupyter notebook \cite{kluyver:2016:jupyter} with finite difference code is available at \url{https://github.com/usernnamee/NDT-Testing-SOR} and \url{https://jupyter.snerds.org}. Data are also available at \url{https://github.com/devangel77b/427syagnyeshwaran-lab3}. 
+The voltage difference field was then analyzed as the primary non-destructive testing signal. Numerical computations were performed in Python using the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. A Jupyter notebook \cite{kluyver:2016:jupyter} with finite difference code is available at \url{https://github.com/usernnamee/NDT-Testing-SOR} and \url{https://jupyter.snerds.org}. Data and code are also available at \url{https://github.com/devangel77b/427syagnyeshwaran-lab3}. 
 
 
 
@@ -252,7 +254,7 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 \appendix
 \section{Implementation code}
 The following Python code was used to implement the finite-difference solver, apply boundary conditions, compute the electrical field, and generate \cref{fig:results,fig:flaw,fig: voltage difference,fig:conductivity map}. The code makes use of the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. Relaxation or Gauss-Seidel is implemented around line 59, while successive over-relaxation is implemented around line 62 \cite{press:1992:numerical}.
-\inputminted[fontsize=\scriptsize,linenos,breaklines]{python}{figures/main2.py}
+\inputminted{python}{figures/main2.py}
 
 
 
