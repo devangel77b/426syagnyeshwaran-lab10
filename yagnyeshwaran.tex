@@ -61,9 +61,9 @@
 % Corresponding author is a special position
 % Last author normally most senior
 % You can put your names in any order you decide but be aware of these conventions
-\date{\today}
-\markboth{Journal of Science \& Engineering, Vol.~2, No.~5,~March 31, 2026}{Yagnyeshwaran  \MakeLowercase{\textit{et al.}}: Detecting flaws via finite difference method} % may need shortened form of author names or title
-\setcounter{page}{1} % LEAVE FOR EDITOR
+\date{April 10, 2026}
+\markboth{Journal of Science \& Engineering, Vol.~2, No.~4,~April 10, 2026}{Yagnyeshwaran  \MakeLowercase{\textit{et al.}}: Detecting flaws via finite difference method} % may need shortened form of author names or title
+\setcounter{page}{77} % LEAVE FOR EDITOR
 \newcommand{\keywords}{computational, 3D printing, Gauss-Seidel, finite difference, Python, conductivity, Laplace's equation, Poisson's equation, finite difference method,  successive over-relaxation} % put your keywords here, lower case unless proper noun or acronym, separated by commas
 \makeatletter
 \AtBeginDocument{
@@ -73,7 +73,7 @@ pdfauthor={\@author},
 pdfsubject={physics},
 pdfkeywords={\keywords}}}
 \IEEEoverridecommandlockouts
-\IEEEpubid{\makebox[\columnwidth]{10.64804/xxxxxxxx~\copyright~2026 J S\&E \href{https://creativecommons.org/licenses/by-nc/4.0/}{CC-BY-NC 4.0}\hfill} \hspace{\columnsep}\makebox[\columnwidth]{ }}% LEAVE FOR EDITOR
+\IEEEpubid{\makebox[\columnwidth]{\href{10.64808/xxxxxx}{10.64804/xxxxxxxx}~\copyright~2026 J S\&E \href{https://creativecommons.org/licenses/by-nc/4.0/}{CC-BY-NC 4.0}\hfill} \hspace{\columnsep}\makebox[\columnwidth]{ }}% LEAVE FOR EDITOR
 \makeatother
 
 
@@ -238,12 +238,19 @@ In the future, we aim to make this process more precise by detecting the absence
 
 
 
+\appendix
+\section{Implementation code}
+The following Python code was used to implement the finite-difference solver, apply boundary conditions, compute the electrical field, and generate \cref{fig:results,fig:flaw,fig: voltage difference,fig:conductivity map}. The code makes use of the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. Relaxation or Gauss-Seidel is implemented around line 59, while successive over-relaxation is implemented around line 62 \cite{press:1992:numerical}.
+\inputminted{python}{figures/main2.py}
 
 
 
 
 
-\section{Acknowledgement} % In IEEE it is called ``acknowledgement'' 
+
+
+\section*{Acknowledgement} % In IEEE it is called ``acknowledgement'' 
+\addcontentsline{toc}{section}{Acknowledgment} 
 
 The team thanks all group members for their collaborative contributions to this work, including code development, simulation design, and manuscript writing. This work was made possible through close teamwork and collaboration among all group members throughout the research and writing process. 
 
@@ -251,10 +258,6 @@ Additionally, the team acknowledges the Science and Engineering Magnet Program f
 
 
 
-\appendix
-\section{Implementation code}
-The following Python code was used to implement the finite-difference solver, apply boundary conditions, compute the electrical field, and generate \cref{fig:results,fig:flaw,fig: voltage difference,fig:conductivity map}. The code makes use of the \texttt{numpy} and \texttt{matplotlib} libraries \cite{numpy,matplotlib}. Relaxation or Gauss-Seidel is implemented around line 59, while successive over-relaxation is implemented around line 62 \cite{press:1992:numerical}.
-\inputminted{python}{figures/main2.py}
 
 
 
